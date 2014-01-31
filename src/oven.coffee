@@ -115,12 +115,27 @@ lint = (src, quiet, cb) ->
 			if cb?
 				cb code
 
+loc = (src, bin) ->
+	count = 0
+	fileList = genList src, ".coffee"
+	for file in fileList
+		lines = fs.readFileSync file
+				.toString()
+				.split "\n"
+		for l in lines
+			lineNoWhite = l.replace "/ /g", ""
+							.replace "/\t/g", ""
+			if lineNoWhite isnt "" and lineNoWhite.substring(0, 1) isnt "#"
+				count += 1
+
+	console.log count
+
 cmd = process.argv[2]
 
 srcdir = null
 bindir = null
 
-if cmd in ["build", "watch", "clean", "lint"]
+if cmd in ["build", "watch", "clean", "lint", "loc"]
 	ovenfilePath = process.cwd() + "/Ovenfile"
 
 	if fs.existsSync ovenfilePath
@@ -141,3 +156,5 @@ switch cmd
 	when "watch" then watch srcdir, bindir
 	when "clean" then clean srcdir, bindir
 	when "lint"  then lint srcdir, false
+	when "loc"   then loc srcdir, bindir
+	else console.log "Unrecognized command #{cmd}"
