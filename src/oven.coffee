@@ -128,12 +128,11 @@ loc = (src, bin) ->
 			if lineNoWhite isnt "" and lineNoWhite.substring(0, 1) isnt "#"
 				count += 1
 
-	console.log count
+	count
 
 cmd = process.argv[2]
 
-srcdir = null
-bindir = null
+dirs = []
 
 if cmd in ["build", "watch", "clean", "lint", "loc"]
 	ovenfilePath = process.cwd() + "/Ovenfile"
@@ -141,20 +140,31 @@ if cmd in ["build", "watch", "clean", "lint", "loc"]
 	if fs.existsSync ovenfilePath
 		ovenfile = JSON.parse fs.readFileSync ovenfilePath
 
-		srcdir = ovenfile.src
-		bindir = ovenfile.bin
+		dirs = ovenfile.directories
 	else
 		console.log "An Ovenfile wasn't found in the current directory!"
 		process.exit -1
 
 switch cmd
 	when "build"
-		lint srcdir, true, (code) ->
-			if code isnt -900
-				build srcdir, bindir
-				console.log clc.green "Build succeeded."
-	when "watch" then watch srcdir, bindir
-	when "clean" then clean srcdir, bindir
-	when "lint"  then lint srcdir, false
-	when "loc"   then loc srcdir, bindir
+		for dir in dirs
+			lint dir.src, true, (code) ->
+				if code isnt -900
+					build dir.src, dir.bin
+					console.log clc.green "Build succeeded."
+	when "watch"
+		for dir in dirs
+			watch dir.src, dir.bin
+	when "clean"
+		for dir in dirs
+			clean dir.src, dir.bin
+	when "lint"
+		for dir in dirs
+			lint dir.src, false
+	when "loc"
+		total = 0
+		for dir in dirs
+			total += loc dir.src, dir.bin
+
+		console.log total
 	else console.log "Unrecognized command #{cmd}"

@@ -1,4 +1,8 @@
 {
-	"src":"./src",
-	"bin":"./lib"
+	"directories":[
+		{
+			"src":"./src",
+			"bin":"./lib"
+		}
+	]
 }

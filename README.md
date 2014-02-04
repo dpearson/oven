@@ -17,13 +17,17 @@ Make sure you have [node.js](http://nodejs.org/) installed, then run:
 
 ### Using Oven ###
 
-For each project you want to build with Oven, you'll need to create a file named `Ovenfile` in the project's root directory. This file is just JSON, with two keys: `src`, the relative path to the source directory, and `bin`, the relative path to the output directory. Both paths are searched recursively.
+For each project you want to build with Oven, you'll need to create a file named `Ovenfile` in the project's root directory. This file is just JSON, with one key: `directories`. This value is an array of objects, each with two keys: `src`, the relative path to the source directory, and `bin`, the relative path to the output directory. Both paths are searched recursively.
 
 ##### Example Ovenfile #####
 
 	{
-		"src":"./src",
-		"bin":"./lib"
+		"directories":[
+			{
+				"src":"./src",
+				"bin":"./lib"
+			}
+		]
 	}
 
 ### Commands ###
