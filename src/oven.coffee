@@ -148,10 +148,14 @@ if cmd in ["build", "watch", "clean", "lint", "loc"]
 switch cmd
 	when "build"
 		for dir in dirs
-			lint dir.src, true, (code) ->
-				if code isnt -900
-					build dir.src, dir.bin
-					console.log clc.green "Build succeeded."
+			unless dir.skipLint
+				lint dir.src, true, (code) ->
+					if code isnt -900
+						build dir.src, dir.bin
+						console.log clc.green "Build succeeded."
+			else
+				build dir.src, dir.bin
+				console.log clc.green "Build succeeded."
 	when "watch"
 		for dir in dirs
 			watch dir.src, dir.bin
