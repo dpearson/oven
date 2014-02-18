@@ -9,10 +9,10 @@
 		"type":"git",
 		"url":"https://github.com/dpearson/oven.git"
 	},
-	"version":"0.0.3",
+	"version":"0.0.4",
 	"dependencies": {
 		"coffee-script":"1.7.1",
-		"coffeelint":"1.0.6",
+		"coffeelint":"1.0.8",
 		"cli-color":"0.2.3"
 	},
 	"engines": {
