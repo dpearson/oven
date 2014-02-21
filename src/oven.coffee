@@ -46,6 +46,13 @@ build = (src, bin) ->
 		else
 			process.exit -1
 
+lintAndBuild = (src, bin, cb) ->
+	lint src, true, (code) ->
+		if code isnt -900
+			build src, bin
+			cb true
+		else
+			cb false
 watch = (src, bin) ->
 	runCmd coffee, ["-w", "-o", bin, "-c", src]
 
@@ -66,12 +73,13 @@ watch = (src, bin) ->
 		else if fileIs(f, ".js") or fileIs(f, ".json")
 			fs.watchFile srcPath, genCpyFunc srcPath, binPath
 
-clean = (src, bin) ->
+clean = (bin) ->
 	binFiles = fs.readdirSync bin
 	for f in binFiles
 		binPath = bin + "/" + f
 		stat = fs.statSync binPath
 		if stat.isDirectory()
+			clean binPath
 			fs.rmdirSync binPath
 		else
 			fs.unlink binPath
@@ -149,10 +157,11 @@ switch cmd
 	when "build"
 		for dir in dirs
 			unless dir.skipLint
-				lint dir.src, true, (code) ->
-					if code isnt -900
-						build dir.src, dir.bin
+				lintAndBuild dir.src, dir.bin, (success) ->
+					if success
 						console.log clc.green "Build succeeded."
+					else
+						console.log clc.red "Build failed."
 			else
 				build dir.src, dir.bin
 				console.log clc.green "Build succeeded."
@@ -161,7 +170,7 @@ switch cmd
 			watch dir.src, dir.bin
 	when "clean"
 		for dir in dirs
-			clean dir.src, dir.bin
+			clean dir.bin
 	when "lint"
 		for dir in dirs
 			lint dir.src, false
