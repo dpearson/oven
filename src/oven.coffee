@@ -53,6 +53,7 @@ lintAndBuild = (src, bin, cb) ->
 			cb true
 		else
 			cb false
+
 watch = (src, bin) ->
 	runCmd coffee, ["-w", "-o", bin, "-c", src]
 
