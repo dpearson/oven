@@ -3,6 +3,7 @@
 	All rights reserved.
 ###
 
+child_process = require "child_process"
 clc = require "cli-color"
 fs = require "fs"
 {runCmd, runSilent} = require "./cmd"
@@ -142,17 +143,17 @@ loc = (src, bin) ->
 cmd = process.argv[2]
 
 dirs = []
+ovenfile = null
 
-if cmd in ["build", "watch", "clean", "lint", "loc"]
-	ovenfilePath = process.cwd() + "/Ovenfile"
+ovenfilePath = process.cwd() + "/Ovenfile"
 
-	if fs.existsSync ovenfilePath
-		ovenfile = JSON.parse fs.readFileSync ovenfilePath
+if fs.existsSync ovenfilePath
+	ovenfile = JSON.parse fs.readFileSync ovenfilePath
 
-		dirs = ovenfile.directories
-	else
-		console.log "An Ovenfile wasn't found in the current directory!"
-		process.exit -1
+	dirs = ovenfile.directories
+else
+	console.log "An Ovenfile wasn't found in the current directory!"
+	process.exit -1
 
 switch cmd
 	when "build"
@@ -181,4 +182,11 @@ switch cmd
 			total += loc dir.src, dir.bin
 
 		console.log total
-	else console.log "Unrecognized command #{cmd}"
+	else
+		if ovenfile?.scripts?[cmd]?
+			proc = child_process.exec ovenfile.scripts[cmd]
+
+			proc.stdout.pipe process.stdout
+			proc.stderr.pipe process.stderr
+		else
+			console.log "Unrecognized command #{cmd}"
