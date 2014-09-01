@@ -22,8 +22,12 @@ genCpyFunc = (filename, dest) ->
 fileIs = (name, type) ->
 	name.toString().indexOf(type) is name.toString().length - type.length
 
-build = (src, bin) ->
-	runCmd coffee, ["-o", bin, "-c", src], (code) ->
+build = (src, bin, bare) ->
+	opts = ["-o", bin, "-c", src]
+	if bare
+		opts.unshift "-b"
+
+	runCmd coffee, opts, (code) ->
 		if code is 0
 			srcFiles = fs.readdirSync src
 			for f in srcFiles
@@ -47,16 +51,20 @@ build = (src, bin) ->
 		else
 			process.exit -1
 
-lintAndBuild = (src, bin, cb) ->
+lintAndBuild = (src, bin, bare, cb) ->
 	lint src, true, (code) ->
 		if code isnt -900
-			build src, bin
+			build src, bin, bare
 			cb true
 		else
 			cb false
 
-watch = (src, bin) ->
-	runCmd coffee, ["-w", "-o", bin, "-c", src]
+watch = (src, bin, bare) ->
+	opts = ["-w", "-o", bin, "-c", src]
+	if bare
+		opts.unshift "-b"
+
+	runCmd coffee, opts
 
 	srcFiles = fs.readdirSync src
 	for f in srcFiles
@@ -159,17 +167,17 @@ switch cmd
 	when "build"
 		for dir in dirs
 			unless dir.skipLint
-				lintAndBuild dir.src, dir.bin, (success) ->
+				lintAndBuild dir.src, dir.bin, dir.bare, (success) ->
 					if success
 						console.log clc.green "Build succeeded."
 					else
 						console.log clc.red "Build failed."
 			else
-				build dir.src, dir.bin
+				build dir.src, dir.bin, dir.bare
 				console.log clc.green "Build succeeded."
 	when "watch"
 		for dir in dirs
-			watch dir.src, dir.bin
+			watch dir.src, dir.bin, dir.bare
 	when "clean"
 		for dir in dirs
 			clean dir.bin
